@@ -1,4 +1,8 @@
-# first get input
+import sys
+
+sys.stdout = open("tracing.out", "w")
+sys.stdin = open("tracing.in", "r")
+
 
 n, t = [int(x) for x in input().split()]
 infectedMain = [int(i) for i in input().strip()]
@@ -12,29 +16,32 @@ shakes.sort()
 def simulate(cowZero):
     maxk = -float("inf")
     mink = float("inf")
-    shakeTimes = [0] * n
-    infected = [0] * n
-    infected[cowZero] = 1
     for k in range(251):
-        out = False
+        shakeTimes = [0] * n
+        infected = [0] * n
+        infected[cowZero] = 1
         for i in range(len(shakes)):
             cow1, cow2 = shakes[i][1], shakes[i][2]
+
+            cow1wasinfected = False
+            cow2wasinfected = False
+            if infected[cow1-1]:
+                cow1wasinfected = True
+            if infected[cow2-1]:
+                cow2wasinfected = True
+
             if infected[cow1-1] and shakeTimes[cow1-1] < k:
                 infected[cow2-1] = 1
-                shakeTimes[cow1-1] += 1
-                shakeTimes[cow2-1] += 1
             elif infected[cow2-1] and shakeTimes[cow2 - 1] < k:
                 infected[cow1-1] = 1
+            
+            if cow1wasinfected:
                 shakeTimes[cow1-1] += 1
+            if cow2wasinfected:
                 shakeTimes[cow2-1] += 1
-            if infected[cow1-1]:
-                if infectedMain[cow1-1] == 0:
-                    out = True
-            elif infected[cow2-1]:
-                if infectedMain[cow2-1] == 0:
-                    out = True
-            if out:
-                break
+            
+            
+
         if (infected == infectedMain):
             maxk = max(maxk, k)
             mink = min(mink, k)
