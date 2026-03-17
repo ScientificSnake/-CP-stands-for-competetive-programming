@@ -7,13 +7,11 @@ for line_num in range(8):
         if char == '*':
             reservedCount += 1
             Oboard[(index, line_num)] = '*'
-        else:
-            Oboard[(index, line_num)] = '.'
 
 solutions = set()
 
 def boardNotValid(board: dict, addedQueen):
-    for key, val in board:
+    for key, val in board.items():
         if val != 'q':
             continue
         if key == addedQueen:
@@ -25,10 +23,10 @@ def boardNotValid(board: dict, addedQueen):
         ydif = abs(y1 - y2)
 
         if ydif == 0 or xdif == 0:
-            return False
+            return True
         if ydif == xdif:
-            return False
-    return True
+            return True
+    return False
 
 def addQueens(i : int, board: dict, added : tuple = None):
     # check if board valid
@@ -43,8 +41,11 @@ def addQueens(i : int, board: dict, added : tuple = None):
     
     xcoord = i
     for ycoord in range(8):
-        if board[(xcoord, ycoord)] in ['*', 'q']:
-            continue
+        try:
+            if board[(xcoord, ycoord)] in ['*', 'q']:
+                continue
+        except:
+            pass
         newboard = board.copy()
         newboard[(xcoord, ycoord)] = 'q'
         addQueens(i+1, newboard, added=(xcoord, ycoord))
