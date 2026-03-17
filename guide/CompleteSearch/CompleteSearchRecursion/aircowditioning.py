@@ -14,4 +14,5 @@ for _ in range(m_aircons):
 for bmask in range(1 << m_aircons):
     for i in range(m_aircons):
         if bmask & (1 << m_aircons):
-            fan = fans[bmask] 
+            fan = fans[i]
+             
