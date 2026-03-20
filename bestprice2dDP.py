@@ -37,5 +37,15 @@ def bestPrice(target, k):
     
 # now actually do the things
 
+# for query in querys:
+#     print(bestPrice(query, n -1 ))  # -1 for 0 index shift
+
+for kpos in range(1,n):
+    for tpos in range(2, highest_query + 1):
+        if best_prices[kpos][tpos] == None:
+            continue
+        best_prices[kpos][tpos] = bestPrice(tpos, kpos)
+
+
 for query in querys:
-    print(bestPrice(query, n -1 ))  # -1 for 0 index shift
+    print(bestPrice(query, n-1))
