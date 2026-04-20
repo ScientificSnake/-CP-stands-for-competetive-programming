@@ -12,7 +12,10 @@ def main():
             if line[i] == line[k]:
                 i += 1
                 continue
-            
+
+            # if they are different you can try get all 4 xx --- xx
+            # and change all to something.
+
 
 
 
