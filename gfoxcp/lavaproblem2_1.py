@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque as Queue
 from sys import stdin
 import time
 
@@ -8,7 +8,7 @@ class mainmap():
         self.mapx = maxx
         self.mapy = maxy
         self.map2d = map2dlist; self.map2d : list[list[str]]
-        self.lava_q = lavaset; self.lavaset : deque
+        self.lava_q = lavaset; self.lavaset : Queue
         self.start = start
         self.end = end
     
@@ -30,8 +30,8 @@ def isTileLava(x, y, time, lavamap) -> bool:
     return lavamap[y][x] <= time
 
 def bfsfindpath(tmap: mainmap, lavamap : list[list[float]]):
-    mainq = deque()
-    pq = deque()
+    mainq = Queue()
+    pq = Queue()
     visited = set([tmap.start])
 
     mainq.append((tmap.start, 0))
@@ -104,33 +104,44 @@ def getlavamap(tmap : mainmap):
     return lava2d
 
 
-# def getmap(inputdata : list[str]):
-#     map2d = []
-#     mapdata = stdin.readline().splitlines
-
-#     map2d = 
-
-#     lavaset = []
-#     start = (0,0)
-#     end = (0,0)
-
-
-#     for y, row in enumerate(map2d):
-#         if 's' in row:
-#             start = (row.index('s'), y)
-#         if 'e' in row:
-#             end = (row.index('e'), y)
-#         if 'l' in row:
-#             lavaset.extend((x, y) for x, char in enumerate(row) if char == 'l')
-    
-
-#     result = mainmap(mapx, mapy, map2d, Queue(lavaset), start, end)
-#     return result
-
-def solve(mapdata):
+def getmap():
+    map2d = []
+    mapx, mapy = [int(x) for x in stdin.readline().strip().split()]
     stime = time.time()
+    lavaset = Queue()
+    start = (0,0)
+    end = (0,0)
+
+    startfound = False
+    endfound = False
+
+    for y in range(mapy):
+        s = stdin.readline().strip().lower()
+        map2d.append(s)
+
+        if not startfound:
+            try: 
+                start = (s.index('s'), y)
+            except:
+                pass
+        
+        if not endfound:
+            try:
+                start = (s.index('e'), y)
+            except:
+                pass
+
+        if 'l' in s:
+            [lavaset.append((x,y)) for x, char in enumerate(s) if char == 'l']
+    
+    result = mainmap(mapx, mapy, map2d, lavaset, start, end)
     endtime = time.time()
     print(f'Map state took {endtime-stime}')
+    return result
+
+def solve():
+    
+    mapdata = getmap()
 
     stime = time.time()
     lavamap = getlavamap(mapdata)
@@ -149,34 +160,9 @@ def solve(mapdata):
 
 
 def main():
-    inputdata = stdin.readlines()
-    lines = iter(inputdata)
-    ntests = int(next(lines))
-
-    
-    for nthtest in range(ntests):
-        map2d = []
-        mapx, mapy = map(int, next(lines).split())
-        start = None
-        end = None
-        lavas = deque()
-        for y in range(mapy):
-            s = next(lines)
-            map2d.append(s)
-            i = s.find('S')
-            if i != -1:
-                start = (i, y)
-            i = s.find('E')
-            if i != -1:
-                end = (i,y)
-            
-            if 'L' in s:
-                lavas.extend([(x,y) for x, char in enumerate(s) if char == 'L'])
-        mapobj = (mainmap(mapx, mapy, map2d, lavas, start, end))
-
-        solve(mapobj)
-
-        del mapobj
+    ntests = int(input())
+    for _ in range(ntests):
+        solve()
 
 
 main()
