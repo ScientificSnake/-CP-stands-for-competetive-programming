@@ -16,6 +16,9 @@ class mainmap():
         self.maxtime = time
 
 
+def index2d1d(x,y, width):
+    return (y*width) + x
+
 def getAdjCoordsBounded(_pos : tuple[int,int], tmap : mainmap) -> list[tuple[int,int]]:
     x, y = _pos
     results = []
@@ -32,7 +35,10 @@ def isTileLava(x, y, time, lavamap) -> bool:
 def bfsfindpath(tmap: mainmap, lavamap : list[list[float]]):
     mainq = Queue()
     pq = Queue()
-    visited = set([tmap.start])
+    visited = [False] * tmap.mapx * tmap.mapy
+    visited : list[bool]
+
+    visited[index2d1d(tmap.start[0], tmap.start[1], tmap.mapx)] = True
 
     mainq.append((tmap.start, 0))
 
@@ -45,7 +51,7 @@ def bfsfindpath(tmap: mainmap, lavamap : list[list[float]]):
             except:
                 break # nothing left
 
-        totaldistremaining = abs(tmap.start[0]-x) + abs(tmap.start[1]-y)
+        totaldistremaining = abs(tmap.end[0]-x) + abs(tmap.end[1]-y)
 
         # pruning
         try:
@@ -57,18 +63,18 @@ def bfsfindpath(tmap: mainmap, lavamap : list[list[float]]):
             pass  # does nto have max time
 
         adjs = getAdjCoordsBounded((x,y),tmap)
-        adjs = [(x,y) for x,y in adjs if (tmap.map2d[y][x] != '#') and (x,y) not in visited]
+        adjs = [(x,y) for x,y in adjs if (tmap.map2d[y][x] != '#') and not visited[index2d1d(x, y, tmap.mapx)]]
 
         for nx, ny in adjs:
             if isTileLava(nx, ny, time +1, lavamap):
                 continue
             else:
-                if tmap.map2d[ny][nx] == 'e':
+                if tmap.map2d[ny][nx] == 'E':
                     return True
                 else:
-                    visited.add((nx,ny))
+                    visited[index2d1d(nx,ny, tmap.mapx)] = True
 
-                    newtotaldistremaining = abs(tmap.start[0]-nx) + abs(tmap.start[1]-ny)
+                    newtotaldistremaining = abs(tmap.end[0]-nx) + abs(tmap.end[1]-ny)
                     if newtotaldistremaining < totaldistremaining:
                         pq.append(((nx,ny),time+1)) # going in the right direction
                     else:
@@ -80,34 +86,33 @@ def getlavamap(tmap : mainmap):
     lava2d = [[float('inf')] * tmap.mapx for _ in range(tmap.mapy)]
 
     lavaQ = tmap.lava_q
-
+    visited = [False] * tmap.mapx * tmap.mapy 
     for x,y in lavaQ:
         lava2d[y][x] = 0
+        visited[index2d1d(x,y, tmap.mapx)] = True
 
-
-    visited = set(tmap.lava_q)
     while len(lavaQ):
         x, y = lavaQ.popleft()
-        if tmap.map2d[y][x] == 'e':
+        if tmap.map2d[y][x] == 'E':
             tmap.noteEndCoveringTime(lava2d[y][x])
             # here you can break out because nothing should get past this time
             break
         adjs = getAdjCoordsBounded((x,y), tmap)
-        adjs = [(nx,ny) for nx,ny in adjs if (tmap.map2d[ny][nx] not in ['#', 'l']) and (nx,ny) not in visited]
+        adjs = [(nx,ny) for nx,ny in adjs if (tmap.map2d[ny]    [nx] not in ['#', 'L']) and not visited[index2d1d(nx, ny, tmap.mapx)]]
         # do not override previous lave or go on bedrock
 
         for nx, ny in adjs:
-            visited.add((nx,ny))
+            visited[index2d1d(nx, ny, tmap.mapx)] = True
             lava2d[ny][nx] = lava2d[y][x] +1
             lavaQ.append([nx,ny])
 
     return lava2d
 
 
-def getmap():
-    map2d = []
-    mapx, mapy = [int(x) for x in stdin.readline().strip().split()]
+def getmap(inputdata):
     stime = time.time()
+    map2d = []
+    mapx, mapy = [int(x) for x in next(inputdata).split()]
     lavaset = Queue()
     start = (0,0)
     end = (0,0)
@@ -116,33 +121,33 @@ def getmap():
     endfound = False
 
     for y in range(mapy):
-        s = stdin.readline().strip().lower()
+        s = next(inputdata).strip()
         map2d.append(s)
 
         if not startfound:
             try: 
-                start = (s.index('s'), y)
+                start = (s.index('S'), y)
+                startfound = True
             except:
                 pass
         
         if not endfound:
             try:
-                start = (s.index('e'), y)
+                end = (s.index('E'), y)
+                endfound = True
             except:
                 pass
 
-        if 'l' in s:
-            [lavaset.append((x,y)) for x, char in enumerate(s) if char == 'l']
+        if 'L' in s:
+            [lavaset.append((x,y)) for x, char in enumerate(s) if char == 'L']
     
     result = mainmap(mapx, mapy, map2d, lavaset, start, end)
     endtime = time.time()
     print(f'Map state took {endtime-stime}')
     return result
 
-def solve():
-    
-    mapdata = getmap()
-
+def solve(inputdata):
+    mapdata = getmap(inputdata)
     stime = time.time()
     lavamap = getlavamap(mapdata)
     endtime = time.time()
@@ -160,9 +165,12 @@ def solve():
 
 
 def main():
-    ntests = int(input())
+    rawinputdata = stdin.readlines()
+    inputdata = iter(rawinputdata)
+    ntests = int(next(inputdata))
+
     for _ in range(ntests):
-        solve()
+        solve(inputdata)
 
 
 main()

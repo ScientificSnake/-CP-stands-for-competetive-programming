@@ -1,5 +1,5 @@
-def generate_500x500_test(filename="test500.in"):
-    R, C = 500, 500
+def generate_500x500_test(filename="test1000.in"):
+    R, C = 1000, 1000
     # Initialize a 500x500 grid of empty space
     grid = [["." for _ in range(C)] for _ in range(R)]
 
