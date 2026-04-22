@@ -1,38 +1,59 @@
-import math
+from math import ceil
+
+from sys import stdin
+from collections import deque
 from functools import lru_cache
 
-@lru_cache
-def factorsingle(nums: tuple):
-    nums = tuple(set(nums))
-    for num in nums:
-        cap = math.ceil(math.sqrt(num))
 
-        # start at 2 because we dont want to divide by 1
-        divisors = range(2, cap + 1)
+@lru_cache(256)
+def factorsingle(num: int) -> tuple[tuple[int, int], bool]:
+    cap = ceil(pow(num, 0.5))
 
-        for divisor in divisors:
-            if divisor == num:
+    # start at 2 because we dont want to divide by 1
+    divisors = range(2, cap + 1)
+
+    for divisor in divisors:
+        if divisor == num:
+            continue
+        quotient = num / divisor
+
+        if quotient.is_integer():
+            finalnew = (int(quotient), divisor)
+            return finalnew, True
+    return (-1, -1), False
+
+
+fufcache = {}
+fufcache : dict[int, frozenset]
+
+
+def fullUniqueFactors(num: int):
+    if num in fufcache:
+        return fufcache[num]
+    else:
+        factors = set()
+        facq = deque([num])
+
+        while facq:
+            tfactor = facq.popleft() 
+            
+            if tfactor in fufcache:
+                factors.update(fufcache[tfactor])
                 continue
-            quotient = num / divisor
+            else:
+                newnums, success = factorsingle(tfactor)
 
-            if quotient.is_integer():
-                finalnew = [int(quotient), divisor]
-                newnums = list(nums)
-                newnums.remove(num)
-                newnums.extend(finalnew)
-                nums = tuple(newnums)
-                return nums, True
-    return nums, False
-
-
+                if not success:
+                    factors.add(tfactor) # it is prim
+                else:
+                    facq.extend(newnums)
+        res = frozenset(factors)
+        fufcache[num] = res
+        return res    
+    
 @lru_cache
 def isEvenprimefactors(n: int):
-    factors = (n,)
-    while True:
-        factors, notdone = factorsingle(factors)
-        if not notdone:
-            break
-    factors = set(factors)
+    factors = fullUniqueFactors(n)
     uniques = len(factors)
 
     if uniques % 2 == 0:
