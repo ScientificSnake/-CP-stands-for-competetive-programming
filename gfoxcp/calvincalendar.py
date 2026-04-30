@@ -72,7 +72,7 @@ for _ in range(ntests):
             calendarString += '\n'
     
     print(calendarString.rstrip())
-    print('-' * 10)
+    print('-' * 20)
 
 
 
